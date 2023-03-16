@@ -30,6 +30,16 @@
         app:layout_constraintStart_toEndOf="@id/textViewScore"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/textViewTask"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@+id/guideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewScore" />
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
         android:layout_width="wrap_content"
@@ -38,35 +48,35 @@
         app:layout_constraintGuide_percent="0.66" />
 
     <TextView
-        android:id="@+id/button"
+        android:id="@+id/textViewOption1"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@android:color/holo_blue_dark"
         android:gravity="center"
         android:textColor="@android:color/background_light"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/button3"
-        app:layout_constraintEnd_toStartOf="@+id/button2"
+        app:layout_constraintBottom_toTopOf="@+id/textViewOption3"
+        app:layout_constraintEnd_toStartOf="@+id/textViewOption2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline"
         tools:ignore="TextContrastCheck" />
 
     <TextView
-        android:id="@+id/button2"
+        android:id="@+id/textViewOption2"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@android:color/holo_green_dark"
         android:gravity="center"
         android:textColor="@android:color/background_light"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/button4"
+        app:layout_constraintBottom_toTopOf="@+id/textViewOption4"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/button"
+        app:layout_constraintStart_toEndOf="@id/textViewOption1"
         app:layout_constraintTop_toTopOf="@+id/guideline"
         tools:ignore="TextContrastCheck" />
 
     <TextView
-        android:id="@+id/button3"
+        android:id="@+id/textViewOption3"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@android:color/holo_orange_dark"
@@ -74,13 +84,13 @@
         android:textColor="@android:color/background_light"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/button4"
+        app:layout_constraintEnd_toStartOf="@+id/textViewOption4"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button"
+        app:layout_constraintTop_toBottomOf="@id/textViewOption1"
         tools:ignore="TextContrastCheck" />
 
     <TextView
-        android:id="@+id/button4"
+        android:id="@+id/textViewOption4"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@android:color/holo_purple"
@@ -89,9 +99,8 @@
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/button3"
-        app:layout_constraintTop_toBottomOf="@id/button2"
+        app:layout_constraintStart_toEndOf="@id/textViewOption3"
+        app:layout_constraintTop_toBottomOf="@id/textViewOption2"
         tools:ignore="TextContrastCheck" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
