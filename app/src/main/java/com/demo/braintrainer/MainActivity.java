@@ -4,9 +4,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,12 +23,14 @@ public class MainActivity extends AppCompatActivity {
     TextView textViewOption2;
     TextView textViewOption3;
     TextView textViewOption4;
+    List<TextView> textViewList;
 
-    int countQuestion;
     int countAnswer;
-    int a;
-    int b;
-    boolean isPlus;
+    int countQuestion;
+    int randomA;
+    int randomB;
+    int result;
+    int number = 50;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +43,11 @@ public class MainActivity extends AppCompatActivity {
         textViewOption2 = findViewById(R.id.textViewOption2);
         textViewOption3 = findViewById(R.id.textViewOption3);
         textViewOption4 = findViewById(R.id.textViewOption4);
-
+        textViewList = new ArrayList<>();
+        textViewList.add(textViewOption1);
+        textViewList.add(textViewOption2);
+        textViewList.add(textViewOption3);
+        textViewList.add(textViewOption4);
 
         // создание таймера с помощью абстрактного класса
         // 2 параметра: 1-сколько милисек будет отсчитывать таймер, 2-как часто будет тикать таймер
@@ -57,24 +69,87 @@ public class MainActivity extends AppCompatActivity {
         };
         timer.start();
 
-        createTask();
+        startTask();
+
+        textViewOption1.setOnClickListener(view -> {
+            int text = Integer.parseInt(textViewOption1.getText().toString());
+            onClick(text);
+        });
+        textViewOption2.setOnClickListener(view -> {
+            int text = Integer.parseInt(textViewOption2.getText().toString());
+            onClick(text);
+        });
+        textViewOption3.setOnClickListener(view -> {
+            int text = Integer.parseInt(textViewOption3.getText().toString());
+            onClick(text);
+        });
+        textViewOption4.setOnClickListener(view -> {
+            int text = Integer.parseInt(textViewOption4.getText().toString());
+            onClick(text);
+        });
     }
 
-    private void createTask() {
-        if (isPlus) {
-            sum(a, b);
-        } else {
-            diff(a, b);
+    private void startTask() {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        executor.execute(() -> {
+            randomA = (int) (Math.random() * number);
+            randomB = (int) (Math.random() * number);
+            handler.post(() -> {
+                int random = (int) (Math.random() * 2);
+                if (random == 0) {
+                    result = randomA + randomB;
+                    String task = String.format("%s + %s", randomA, randomB);
+                    textViewTask.setText(task);
+                    getContent();
+                } else {
+                    result = randomA - randomB;
+                    String task = String.format("%s - %s", randomA, randomB);
+                    textViewTask.setText(task);
+                    getContent();
+                }
+            });
+        });
+    }
+
+    private void getContent() {
+        String score = String.format("%s / %s", countAnswer, countQuestion);
+        textViewScore.setText(score);
+
+        fillArray();
+    }
+
+    private void fillArray() {
+        int randomRight = (int) (Math.random() * textViewList.size());
+        for (int i = 0; i < textViewList.size(); i++) {
+            if (i == randomRight) {
+                String rightAnswer = Integer.toString(result);
+                textViewList.get(i).setText(rightAnswer);
+            } else {
+                int randomWrong = (int) (Math.random() * number);
+                int random = (int) (Math.random() * 2);
+                boolean isPositive = (random == 0);
+                if (result < 0 && !isPositive) {
+                    randomWrong = randomWrong * (-1);
+                }
+                while (randomWrong == result) {
+                    randomWrong = (int) (Math.random() * number);
+                    if (result < 0 && !isPositive) {
+                        randomWrong = randomWrong * (-1);
+                    }
+                }
+                String wrongAnswer = Integer.toString(randomWrong);
+                textViewList.get(i).setText(wrongAnswer);
+            }
         }
     }
 
-    private void sum(int a, int b) {
-        int c = a + b;
-        Log.i("SUM_", Integer.toString(c));
-    }
-
-    private void diff(int a, int b) {
-        int c = a - b;
-        Log.i("DIFF_", Integer.toString(c));
+    private void onClick(int text) {
+        if (text == result) {
+            countAnswer++;
+        }
+        countQuestion++;
+        startTask();
     }
 }
