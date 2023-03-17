@@ -3,10 +3,12 @@ package com.demo.braintrainer;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,31 +54,51 @@ public class MainActivity extends AppCompatActivity {
         textViewList.add(textViewOption4);
         countAnswer = 0;
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        record = preferences.getInt("record", 0);
+
         // создание таймера с помощью абстрактного класса
         // 2 параметра: 1-сколько милисек будет отсчитывать таймер, 2-как часто будет тикать таймер
-        CountDownTimer timer = new CountDownTimer(10000, 1000) {
+        CountDownTimer timer = new CountDownTimer(30000, 1000) {
             // onTick() принимает кол-во милисек оставшихся до завершения работы таймера
             @Override
             public void onTick(long millisUtilFinished) {
                 int sec = (int) (millisUtilFinished / 1000);
                 sec++;
-                String seconds = Integer.toString(sec);
-                textViewTimer.setText(seconds);
+                int min = sec / 60;
+                String seconds = ":" + sec;
+                String minutes = Integer.toString(min);
+                if (sec < 10) {
+                    if (min == 0) {
+                        textViewTimer.setTextColor(getResources().getColor(R.color.red));
+                    }
+                    seconds = String.format(":0%s", sec);
+                }
+                if (min < 10) {
+                    minutes = String.format("0%s", min);
+                }
+                String time = minutes + seconds;
+                textViewTimer.setText(time);
             }
 
             @Override
             public void onFinish() {
                 Intent intent = new Intent(getApplicationContext(), ResultActivity.class);
-                if (record < countAnswer) {
-                    record = countAnswer;
+                textViewTimer.setText(R.string.time_up);
+                if (countQuestion > 20 && ((double) countAnswer / countQuestion < 0.5)) {
+                    intent.putExtra("record", record);
+                    Toast.makeText(MainActivity.this, "Не торописька", Toast.LENGTH_LONG).show();
+                    startActivity(intent);
+                } else {
+                    if (record < countAnswer) {
+                        record = countAnswer;
+                    }
+                    intent.putExtra("countAnswer", countAnswer);
+                    intent.putExtra("record", record);
+
+                    Toast.makeText(MainActivity.this, "Время вышло", Toast.LENGTH_SHORT).show();
+                    startActivity(intent);
                 }
-                intent.putExtra("countAnswer", countAnswer);
-                intent.putExtra("record", record);
-
-                Toast.makeText(MainActivity.this, "Время вышло", Toast.LENGTH_SHORT).show();
-                textViewTimer.setText("0");
-
-                startActivity(intent);
             }
         };
         timer.start();
@@ -128,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
     private void getContent() {
         String score = String.format("%s / %s", countAnswer, countQuestion);
         textViewScore.setText(score);
-
         fillArray();
     }
 
