@@ -2,6 +2,7 @@ package com.demo.braintrainer;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     int countQuestion;
     int randomA;
     int randomB;
+    int record;
     int result;
     int number = 50;
 
@@ -48,10 +50,11 @@ public class MainActivity extends AppCompatActivity {
         textViewList.add(textViewOption2);
         textViewList.add(textViewOption3);
         textViewList.add(textViewOption4);
+        countAnswer = 0;
 
         // создание таймера с помощью абстрактного класса
         // 2 параметра: 1-сколько милисек будет отсчитывать таймер, 2-как часто будет тикать таймер
-        CountDownTimer timer = new CountDownTimer(6000, 1000) {
+        CountDownTimer timer = new CountDownTimer(10000, 1000) {
             // onTick() принимает кол-во милисек оставшихся до завершения работы таймера
             @Override
             public void onTick(long millisUtilFinished) {
@@ -63,8 +66,17 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                Toast.makeText(MainActivity.this, "Таймер завершен", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getApplicationContext(), ResultActivity.class);
+                if (record < countAnswer) {
+                    record = countAnswer;
+                }
+                intent.putExtra("countAnswer", countAnswer);
+                intent.putExtra("record", record);
+
+                Toast.makeText(MainActivity.this, "Время вышло", Toast.LENGTH_SHORT).show();
                 textViewTimer.setText("0");
+
+                startActivity(intent);
             }
         };
         timer.start();
