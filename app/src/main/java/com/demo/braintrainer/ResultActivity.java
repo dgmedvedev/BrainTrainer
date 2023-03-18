@@ -35,4 +35,10 @@ public class ResultActivity extends AppCompatActivity {
             startActivity(intentStartOver);
         });
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        finish();
+    }
 }

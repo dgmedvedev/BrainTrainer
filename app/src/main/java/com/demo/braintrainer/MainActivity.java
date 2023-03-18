@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -14,6 +13,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -34,7 +34,8 @@ public class MainActivity extends AppCompatActivity {
     int randomB;
     int record;
     int result;
-    int number = 50;
+    int difficulty = 50;
+    int seconds = 30;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,70 +58,28 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         record = preferences.getInt("record", 0);
 
-        // создание таймера с помощью абстрактного класса
-        // 2 параметра: 1-сколько милисек будет отсчитывать таймер, 2-как часто будет тикать таймер
-        CountDownTimer timer = new CountDownTimer(30000, 1000) {
-            // onTick() принимает кол-во милисек оставшихся до завершения работы таймера
-            @Override
-            public void onTick(long millisUtilFinished) {
-                int sec = (int) (millisUtilFinished / 1000);
-                sec++;
-                int min = sec / 60;
-                String seconds = ":" + sec;
-                String minutes = Integer.toString(min);
-                if (sec < 10) {
-                    if (min == 0) {
-                        textViewTimer.setTextColor(getResources().getColor(R.color.red));
-                    }
-                    seconds = String.format(":0%s", sec);
-                }
-                if (min < 10) {
-                    minutes = String.format("0%s", min);
-                }
-                String time = minutes + seconds;
-                textViewTimer.setText(time);
-            }
-
-            @Override
-            public void onFinish() {
-                Intent intent = new Intent(getApplicationContext(), ResultActivity.class);
-                textViewTimer.setText(R.string.time_up);
-                if (countQuestion > 20 && ((double) countAnswer / countQuestion < 0.5)) {
-                    intent.putExtra("record", record);
-                    Toast.makeText(MainActivity.this, "Не торописька", Toast.LENGTH_LONG).show();
-                    startActivity(intent);
-                } else {
-                    if (record < countAnswer) {
-                        record = countAnswer;
-                    }
-                    intent.putExtra("countAnswer", countAnswer);
-                    intent.putExtra("record", record);
-
-                    Toast.makeText(MainActivity.this, "Время вышло", Toast.LENGTH_SHORT).show();
-                    startActivity(intent);
-                }
-            }
-        };
-        timer.start();
-
+        timer();
         startTask();
 
         textViewOption1.setOnClickListener(view -> {
-            int text = Integer.parseInt(textViewOption1.getText().toString());
-            onClick(text);
+            onClick(textViewOption1.getText().toString());
         });
         textViewOption2.setOnClickListener(view -> {
-            int text = Integer.parseInt(textViewOption2.getText().toString());
-            onClick(text);
+            onClick(textViewOption2.getText().toString());
         });
         textViewOption3.setOnClickListener(view -> {
-            int text = Integer.parseInt(textViewOption3.getText().toString());
-            onClick(text);
+            onClick(textViewOption3.getText().toString());
         });
         textViewOption4.setOnClickListener(view -> {
-            int text = Integer.parseInt(textViewOption4.getText().toString());
-            onClick(text);
+            onClick(textViewOption4.getText().toString());
         });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        finish();
+        seconds = -1;
     }
 
     private void startTask() {
@@ -128,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
         Handler handler = new Handler(Looper.getMainLooper());
 
         executor.execute(() -> {
-            randomA = (int) (Math.random() * number);
-            randomB = (int) (Math.random() * number);
+            randomA = (int) (Math.random() * difficulty);
+            randomB = (int) (Math.random() * difficulty);
             handler.post(() -> {
                 int random = (int) (Math.random() * 2);
                 if (random == 0) {
@@ -160,14 +119,14 @@ public class MainActivity extends AppCompatActivity {
                 String rightAnswer = Integer.toString(result);
                 textViewList.get(i).setText(rightAnswer);
             } else {
-                int randomWrong = (int) (Math.random() * number);
+                int randomWrong = (int) (Math.random() * difficulty);
                 int random = (int) (Math.random() * 2);
                 boolean isPositive = (random == 0);
                 if (result < 0 && !isPositive) {
                     randomWrong = randomWrong * (-1);
                 }
                 while (randomWrong == result) {
-                    randomWrong = (int) (Math.random() * number);
+                    randomWrong = (int) (Math.random() * difficulty);
                     if (result < 0 && !isPositive) {
                         randomWrong = randomWrong * (-1);
                     }
@@ -178,11 +137,55 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void onClick(int text) {
-        if (text == result) {
+    private void onClick(String text) {
+        int temp = Integer.parseInt(text);
+        if (temp == result) {
             countAnswer++;
         }
         countQuestion++;
         startTask();
+    }
+
+    private void timer() {
+        Handler handler = new Handler();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                int min = seconds / 60;
+                int sec = seconds % 60;
+                if (min == 0 && sec < 10) {
+                    textViewTimer.setTextColor(getResources().getColor(R.color.red));
+                }
+                String time = String.format(Locale.getDefault(), "%02d:%02d", min, sec);
+                textViewTimer.setText(time);
+                if (seconds > 0) {
+                    seconds--;
+                    handler.postDelayed(this, 1000);
+                } else {
+                    timerFinish();
+                }
+            }
+        });
+    }
+
+    private void timerFinish() {
+        if (seconds == 0) {
+            Intent intent = new Intent(getApplicationContext(), ResultActivity.class);
+            textViewTimer.setText(R.string.time_up);
+            if (countQuestion > 20 && ((double) countAnswer / countQuestion < 0.5)) {
+                intent.putExtra("record", record);
+                Toast.makeText(MainActivity.this, "Не торописька", Toast.LENGTH_LONG).show();
+                startActivity(intent);
+            } else {
+                if (record < countAnswer) {
+                    record = countAnswer;
+                }
+                intent.putExtra("countAnswer", countAnswer);
+                intent.putExtra("record", record);
+
+                Toast.makeText(MainActivity.this, "Время вышло", Toast.LENGTH_SHORT).show();
+                startActivity(intent);
+            }
+        }
     }
 }
