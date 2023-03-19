@@ -1,5 +1,6 @@
 package com.demo.braintrainer;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,11 +38,21 @@ public class MainActivity extends AppCompatActivity {
     int result;
     int difficulty = 50;
     int seconds = 30;
+    boolean isRunning = true;
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("countAnswer", countAnswer);
+        outState.putInt("countQuestion", countQuestion);
+        outState.putInt("seconds", seconds);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         textViewScore = findViewById(R.id.textViewScore);
         textViewTimer = findViewById(R.id.textViewTimer);
         textViewTask = findViewById(R.id.textViewTask);
@@ -58,7 +70,14 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         record = preferences.getInt("record", 0);
 
-        timer();
+        if (savedInstanceState != null) {
+            savedInstanceState.getInt("countAnswer");
+            savedInstanceState.getInt("countQuestion");
+            savedInstanceState.getInt("seconds");
+        }
+
+        Log.i("SEC_1", Integer.toString(seconds));
+
         startTask();
 
         textViewOption1.setOnClickListener(view -> {
@@ -78,8 +97,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        finish();
-        seconds = -1;
+        isRunning = false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isRunning = true;
+        timer();
     }
 
     private void startTask() {
@@ -151,6 +176,9 @@ public class MainActivity extends AppCompatActivity {
         handler.post(new Runnable() {
             @Override
             public void run() {
+                Log.i("SEC_2", Integer.toString(seconds));
+                Log.i("isRunning", Boolean.toString(isRunning));
+
                 int min = seconds / 60;
                 int sec = seconds % 60;
                 if (min == 0 && sec < 10) {
@@ -159,8 +187,10 @@ public class MainActivity extends AppCompatActivity {
                 String time = String.format(Locale.getDefault(), "%02d:%02d", min, sec);
                 textViewTimer.setText(time);
                 if (seconds > 0) {
-                    seconds--;
-                    handler.postDelayed(this, 1000);
+                    if (isRunning) {
+                        seconds--;
+                        handler.postDelayed(this, 1000);
+                    }
                 } else {
                     timerFinish();
                 }
@@ -175,7 +205,6 @@ public class MainActivity extends AppCompatActivity {
             if (countQuestion > 20 && ((double) countAnswer / countQuestion < 0.5)) {
                 intent.putExtra("record", record);
                 Toast.makeText(MainActivity.this, "Не торописька", Toast.LENGTH_LONG).show();
-                startActivity(intent);
             } else {
                 if (record < countAnswer) {
                     record = countAnswer;
@@ -184,8 +213,9 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("record", record);
 
                 Toast.makeText(MainActivity.this, "Время вышло", Toast.LENGTH_SHORT).show();
-                startActivity(intent);
             }
+            startActivity(intent);
+            finish();
         }
     }
 }

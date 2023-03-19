@@ -33,12 +33,12 @@ public class ResultActivity extends AppCompatActivity {
         buttonStartOver.setOnClickListener(view -> {
             Intent intentStartOver = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intentStartOver);
+            finish();
         });
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        finish();
     }
 }
