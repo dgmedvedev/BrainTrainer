@@ -76,8 +76,6 @@ public class MainActivity extends AppCompatActivity {
             savedInstanceState.getInt("seconds");
         }
 
-        Log.i("SEC_1", Integer.toString(seconds));
-
         startTask();
 
         textViewOption1.setOnClickListener(view -> {
@@ -176,9 +174,6 @@ public class MainActivity extends AppCompatActivity {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                Log.i("SEC_2", Integer.toString(seconds));
-                Log.i("isRunning", Boolean.toString(isRunning));
-
                 int min = seconds / 60;
                 int sec = seconds % 60;
                 if (min == 0 && sec < 10) {
@@ -200,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void timerFinish() {
         if (seconds == 0) {
-            Intent intent = new Intent(getApplicationContext(), ResultActivity.class);
+            Intent intent = new Intent(this, ResultActivity.class);
             textViewTimer.setText(R.string.time_up);
             if (countQuestion > 20 && ((double) countAnswer / countQuestion < 0.5)) {
                 intent.putExtra("record", record);

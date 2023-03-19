@@ -31,14 +31,9 @@ public class ResultActivity extends AppCompatActivity {
         preferences.edit().putInt("record", record).apply();
 
         buttonStartOver.setOnClickListener(view -> {
-            Intent intentStartOver = new Intent(getApplicationContext(), MainActivity.class);
+            Intent intentStartOver = new Intent(this, MainActivity.class);
             startActivity(intentStartOver);
             finish();
         });
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
     }
 }
