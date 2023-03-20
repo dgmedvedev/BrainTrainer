@@ -20,15 +20,15 @@ public class ResultActivity extends AppCompatActivity {
         TextView textViewResult = findViewById(R.id.textViewResult);
 
         Intent intent = getIntent();
-        int countAnswer = intent.getIntExtra("countAnswer", 0);
-        int record = intent.getIntExtra("record", 0);
-
-        String result = String.format("Ваш результат: %s\nМаксимальный результат: %s",
-                countAnswer, record);
-        textViewResult.setText(result);
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        preferences.edit().putInt("record", record).apply();
+        if (intent != null && intent.hasExtra("countAnswer") && intent.hasExtra("record")) {
+            int countAnswer = intent.getIntExtra("countAnswer", 0);
+            int record = intent.getIntExtra("record", 0);
+            String result = String.format("Ваш результат: %s\nМаксимальный результат: %s",
+                    countAnswer, record);
+            textViewResult.setText(result);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            preferences.edit().putInt("record", record).apply();
+        }
 
         buttonStartOver.setOnClickListener(view -> {
             Intent intentStartOver = new Intent(this, MainActivity.class);

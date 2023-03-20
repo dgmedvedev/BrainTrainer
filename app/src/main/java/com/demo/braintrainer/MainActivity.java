@@ -67,8 +67,6 @@ public class MainActivity extends AppCompatActivity {
         textViewList.add(textViewOption4);
         countOfRightAnswers = 0;
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        record = preferences.getInt("record", 0);
 
         if (savedInstanceState != null) {
             savedInstanceState.getInt("countAnswer");
@@ -197,6 +195,10 @@ public class MainActivity extends AppCompatActivity {
         if (seconds == 0) {
             Intent intent = new Intent(this, ResultActivity.class);
             textViewTimer.setText(R.string.time_up);
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            record = preferences.getInt("record", 0);
+
             if (countOfQuestions > 20 && ((double) countOfRightAnswers / countOfQuestions < 0.5)) {
                 intent.putExtra("record", record);
                 Toast.makeText(MainActivity.this, "Не торописька", Toast.LENGTH_LONG).show();
