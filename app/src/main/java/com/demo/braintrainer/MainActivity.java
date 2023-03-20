@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,21 +29,22 @@ public class MainActivity extends AppCompatActivity {
     TextView textViewOption4;
     List<TextView> textViewList;
 
-    int countAnswer;
-    int countQuestion;
+    int countOfRightAnswers;
+    int countOfQuestions;
     int randomA;
     int randomB;
     int record;
     int result;
-    int difficulty = 50;
+    int min = 2;
+    int max = 30;
     int seconds = 30;
     boolean isRunning = true;
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt("countAnswer", countAnswer);
-        outState.putInt("countQuestion", countQuestion);
+        outState.putInt("countAnswer", countOfRightAnswers);
+        outState.putInt("countQuestion", countOfQuestions);
         outState.putInt("seconds", seconds);
     }
 
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         textViewList.add(textViewOption2);
         textViewList.add(textViewOption3);
         textViewList.add(textViewOption4);
-        countAnswer = 0;
+        countOfRightAnswers = 0;
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         record = preferences.getInt("record", 0);
@@ -110,11 +110,11 @@ public class MainActivity extends AppCompatActivity {
         Handler handler = new Handler(Looper.getMainLooper());
 
         executor.execute(() -> {
-            randomA = (int) (Math.random() * difficulty);
-            randomB = (int) (Math.random() * difficulty);
+            randomA = (int) (Math.random() * (max - min + 1) + min);
+            randomB = (int) (Math.random() * (max - min + 1) + min);
             handler.post(() -> {
-                int random = (int) (Math.random() * 2);
-                if (random == 0) {
+                int mark = (int) (Math.random() * 2);
+                if (mark == 0) {
                     result = randomA + randomB;
                     String task = String.format("%s + %s", randomA, randomB);
                     textViewTask.setText(task);
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getContent() {
-        String score = String.format("%s / %s", countAnswer, countQuestion);
+        String score = String.format("%s / %s", countOfRightAnswers, countOfQuestions);
         textViewScore.setText(score);
         fillArray();
     }
@@ -142,14 +142,14 @@ public class MainActivity extends AppCompatActivity {
                 String rightAnswer = Integer.toString(result);
                 textViewList.get(i).setText(rightAnswer);
             } else {
-                int randomWrong = (int) (Math.random() * difficulty);
-                int random = (int) (Math.random() * 2);
-                boolean isPositive = (random == 0);
+                int randomWrong = (int) (Math.random() * (max - min + 1) + min);
+                int mark = (int) (Math.random() * 2);
+                boolean isPositive = (mark == 0);
                 if (result < 0 && !isPositive) {
                     randomWrong = randomWrong * (-1);
                 }
                 while (randomWrong == result) {
-                    randomWrong = (int) (Math.random() * difficulty);
+                    randomWrong = (int) (Math.random() * (max - min + 1) + min);
                     if (result < 0 && !isPositive) {
                         randomWrong = randomWrong * (-1);
                     }
@@ -163,9 +163,9 @@ public class MainActivity extends AppCompatActivity {
     private void onClick(String text) {
         int temp = Integer.parseInt(text);
         if (temp == result) {
-            countAnswer++;
+            countOfRightAnswers++;
         }
-        countQuestion++;
+        countOfQuestions++;
         startTask();
     }
 
@@ -197,14 +197,14 @@ public class MainActivity extends AppCompatActivity {
         if (seconds == 0) {
             Intent intent = new Intent(this, ResultActivity.class);
             textViewTimer.setText(R.string.time_up);
-            if (countQuestion > 20 && ((double) countAnswer / countQuestion < 0.5)) {
+            if (countOfQuestions > 20 && ((double) countOfRightAnswers / countOfQuestions < 0.5)) {
                 intent.putExtra("record", record);
                 Toast.makeText(MainActivity.this, "Не торописька", Toast.LENGTH_LONG).show();
             } else {
-                if (record < countAnswer) {
-                    record = countAnswer;
+                if (record < countOfRightAnswers) {
+                    record = countOfRightAnswers;
                 }
-                intent.putExtra("countAnswer", countAnswer);
+                intent.putExtra("countAnswer", countOfRightAnswers);
                 intent.putExtra("record", record);
 
                 Toast.makeText(MainActivity.this, "Время вышло", Toast.LENGTH_SHORT).show();
